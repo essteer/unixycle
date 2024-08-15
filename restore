@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Unixycle - A UNIX recycle bin
+
+recyclebin_abs_path="$HOME/recyclebin"
+restore_info_abs_path="$HOME/.restore.info"
+
+if [ $# -eq 0 ] ; then
+    echo "recycle: missing operand"
+    exit 1  # exit if no args provided
+fi
+
+recycle_state_name=$(basename "$1")
+target_abs_path_in_recyclebin="${recyclebin_abs_path}/${recycle_state_name}"
+
+if ! [ -e "$target_abs_path_in_recyclebin" ] ; then
+    echo "cannot recycle '$1': No such file"
+    exit 2  # exit if file does not exist
+fi
+
+data_in_restore_info=$(cat "$restore_info_abs_path" | grep "$recycle_state_name")
+target_original_abs_path=$(echo -n "$data_in_restore_info" | cut -d: -f2)
+
+if [ -e $target_original_abs_path ] ; then
+    echo "$target_original_abs_path already exists"
+    read -p "Do you want to overwrite? y/n " overwriteDecision
+
+    if [ "$overwriteDecision" != "y" ] && [ "$overwriteDecision" != "Y" ] ; then
+        exit 3  # user declined file overwrite 
+    fi
+fi
+
+# restore target file from recyclebin to original location
+mv "$target_abs_path_in_recyclebin" "$target_original_abs_path"
+# delete data on target file from .restore.info
+grep -v "$data_in_restore_info" "$restore_info_abs_path" > tmp
+mv tmp "$restore_info_abs_path"  # overwrite .restore.info with tmp file from grep -v
+
