@@ -1,6 +1,20 @@
 #!/bin/bash
 
+################################
 # Unixycle - A UNIX recycle bin
+################################
+# Date: 16/08/2024
+# Author: Elliott Steer
+# `restore` retrieves files from a recyclebin directory in a 
+# user's $HOME that were previously recycled via the `recycle`
+# script, and recreates parent directories that no longer exist.
+#
+# File usage:
+# "$ bash restore oops.txt_64135"
+#
+# Data for recycled files is stored in $HOME/.restore.info.
+# See the accompanying `recycle` script for details.
+#################################
 
 recyclebin_abs_path="$HOME/recyclebin"
 restore_info_abs_path="$HOME/.restore.info"
@@ -30,9 +44,13 @@ if [ -e $target_original_abs_path ] ; then
     fi
 fi
 
+# create missing parent dirs for target file original location
+target_original_dir=$(dirname "$target_original_abs_path")
+mkdir -p "$target_original_dir"
 # restore target file from recyclebin to original location
 mv "$target_abs_path_in_recyclebin" "$target_original_abs_path"
 # delete data on target file from .restore.info
 grep -v "$data_in_restore_info" "$restore_info_abs_path" > tmp
 mv tmp "$restore_info_abs_path"  # overwrite .restore.info with tmp file from grep -v
 
+exit 0
