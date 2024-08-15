@@ -1,12 +1,12 @@
-# UNIXycle
+# UNIXycle :recycle:
 
-A recycle bin for UNIX.
+A recycle bin tool for UNIX.
 
 ## Description
 
 UNIXycle provides two scripts — `recycle` & `restore` — for use in removing files to a recycle bin in the user's `$HOME` directory from where they can later be restored.
 
-### recycle
+### recycle :recycle:
 
 The `recycle` script creates a `recyclebin` directory and `.restore.info` file in the user's `$HOME` directory (if they do not already exist).
 
@@ -55,7 +55,7 @@ recycled 'demo_directory/note1.txt'
 recycled 'demo_directory'
 ```
 
-### restore
+### restore :cyclone:
 
 The `restore` script accepts a single file name as an argument.
 
