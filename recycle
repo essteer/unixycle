@@ -16,38 +16,46 @@ if [ $# -eq 0 ] ; then
     exit 1  # exit if no args provided
 fi
 
-if ! [ -e "$1" ] ; then
-    echo "cannot recycle '$1': No such file"
-    exit 2  # exit if file does not exist
-elif [ -d "$1" ] ; then
-    echo "cannot recycle '$1': Is a directory"
-    exit 3  # exit if dir provided
-fi
 
-target_abs_path=$(realpath $1)
-if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
-    echo "attempting to delete recycle - operation aborted"
-    exit 4  # exit if recycle script provided
-fi
+function validate_file() {
+    # validates: file exists, file is file, file is not recycle
+    if ! [ -e "$1" ] ; then
+        echo "cannot recycle '$1': No such file"
+        return 2  # exit function if file does not exist
+    elif [ -d "$1" ] ; then
+        echo "cannot recycle '$1': Is a directory"
+        return 3  # exit function if dir provided
+    fi
+    target_abs_path=$(realpath $1)
+    if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
+        echo "attempting to delete recycle - operation aborted"
+        return 4  # exit function if recycle script provided
+    fi
+    return 0  # is valid file
+}
 
 
-# Above checks confirmed: arg passed, file exists, file is file, file is not recycle
-target_filename=$(basename "$1")
-target_inode=$(ls -i $target_abs_path | cut -d" " -f1)
-recycle_state_name="${target_filename}_${target_inode}"
-recycle_state_abs_path="${recyclebin_abs_path}/${recycle_state_name}"
-name_in_restore_info="${recycle_state_name}:${target_abs_path}"
+function recycle_file() {
+    # recycles a previously validated file
+    target_abs_path=$(realpath $1)
+    target_filename=$(basename "$1")
+    target_inode=$(ls -i $target_abs_path | cut -d" " -f1)
+    recycle_state_name="${target_filename}_${target_inode}"
+    recycle_state_abs_path="${recyclebin_abs_path}/${recycle_state_name}"
+    name_in_restore_info="${recycle_state_name}:${target_abs_path}"
 
-# move target file to recyclebin under recycle_state_name
-mv "$target_abs_path" "$recycle_state_abs_path"
-# store name in .restore.info
-echo "$name_in_restore_info" >> "$restore_info_abs_path"
+    # move target file to recyclebin under recycle_state_name
+    mv "$target_abs_path" "$recycle_state_abs_path"
+    # store name in .restore.info
+    echo "$name_in_restore_info" >> "$restore_info_abs_path"
+}
 
-#echo "arg_abs_path: $arg_abs_path"
-#echo "filename: $filename"
-#echo "inode: $inode"
-#echo "name in recyclebin: $name_in_recyclebin"
-#echo "name in .restore.info: $name_in_restore_info" 
-#echo "valid arg provided"
+
+for i in "$@"
+do
+    if validate_file "$i" ; then
+        recycle_file "$i"
+    fi
+done
 
 exit 0
