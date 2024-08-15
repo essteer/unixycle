@@ -1,10 +1,12 @@
 #!/bin/bash
 
 ################################
-# Unixycle - A UNIX recycle bin
+# UNIXycle - A UNIX recycle bin
 ################################
 # Date: 16/08/2024
 # Author: Elliott Steer
+# Docs: https://github.com/essteer/unixycle/blob/main/README.md
+#
 # `restore` retrieves files from a recyclebin directory in a 
 # user's $HOME that were previously recycled via the `recycle`
 # script, and recreates parent directories that no longer exist.

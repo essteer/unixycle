@@ -1,10 +1,12 @@
 #!/bin/bash
 
 ################################
-# Unixycle - A UNIX recycle bin
+# UNIXycle - A UNIX recycle bin
 ################################
 # Date: 16/08/2024
 # Author: Elliott Steer
+# Docs: https://github.com/essteer/unixycle/blob/main/README.md
+#
 # `recycle` creates a recyclebin directory in a user's $HOME and 
 # stores target files there with their inode numbers appended. It
 # can recursively recycle directory contents via the -r option.
