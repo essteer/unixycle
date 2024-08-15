@@ -11,25 +11,21 @@ if ! [ -e "$restore_info_abs_path" ] ; then
     touch "$restore_info_abs_path"  # create .restore.info if it does not exist
 fi
 
-if [ $# -eq 0 ]
-then
+if [ $# -eq 0 ] ; then
     echo "recycle: missing operand"
     exit 1  # exit if no args provided
 fi
 
-if ! [ -e "$1" ]
-then
+if ! [ -e "$1" ] ; then
     echo "cannot recycle '$1': No such file"
     exit 2  # exit if file does not exist
-elif [ -d "$1" ]
-then
+elif [ -d "$1" ] ; then
     echo "cannot recycle '$1': Is a directory"
     exit 3  # exit if dir provided
 fi
 
 target_abs_path=$(realpath $1)
-if [ "$target_abs_path" = "$recycle_script_abs_path" ]
-then
+if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
     echo "attempting to delete recycle - operation aborted"
     exit 4  # exit if recycle script provided
 fi
