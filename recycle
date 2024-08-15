@@ -7,19 +7,18 @@
 # Author: Elliott Steer
 # `recycle` creates a recyclebin directory in a user's $HOME and 
 # stores target files there with their inode numbers appended. It
-# can also recursively recycle an entire directory's file contents.
+# can recursively recycle directory contents via the -r option.
 # 
 # File usage:
 # "$ bash recycle -iv file1.txt file2.doc moreFiles*"
 # 
-# Directory usage (recursive only):
+# Directory usage:
 # "$ bash recycle -irv dir1"
 #
 # Data for recycled files is stored in $HOME/.restore.info.
 # See the accompanying `restore` script for details.
 ################################
 
-# initialise recyclebin and .restore.info
 recycle_script_abs_path=$(realpath $0)
 recyclebin_abs_path="$HOME/recyclebin"
 restore_info_abs_path="$HOME/.restore.info"
@@ -37,16 +36,16 @@ fi
 function validate_file() {
     # validates: file exists, file is file, file is not recycle
     if ! [ -e "$1" ] ; then
-        echo "cannot recycle '$1': No such file"
+        echo "cannot recycle '$1': no such file"
         return 3  # exit function if file does not exist
-    elif [ -d "$1" ] ; then
-        echo "cannot recycle '$1': Is a directory"
+    elif [ -d "$1" ] && [ "$recursive" != true ] ; then
+        echo "cannot recycle '$1': use -r to recycle directories"
         return 4  # exit function if dir provided
     fi
     target_abs_path=$(realpath $1)
     if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
         echo "attempting to delete recycle - operation aborted"
-        return 5  # exit function if recycle script provided
+        exit 5  # exit script if recycle script provided
     fi
     return 0  # is valid file
 }
@@ -65,6 +64,26 @@ function recycle_file() {
     mv "$target_abs_path" "$recycle_state_abs_path"
     # store name in .restore.info
     echo "$name_in_restore_info" >> "$restore_info_abs_path"
+}
+
+
+function recycle_dir() {
+    # recycles all files in a directory via recursion
+    for j in "$1"/* ; do
+        # validate to prevent deletion of recycle script in sub dir
+        if validate_file "$j" ; then
+            if [ -f "$j" ] ; then
+                recycle_file "$j"
+                if [ "$verbose" = true ] ; then
+                    echo "recycled '$j'"
+                fi
+            elif [ -d "$j" ] ; then
+                recycle_dir "$j"  # recursion
+            fi
+        fi
+    done
+    rm -rf "$1"  # delete dir once all contents recycled
+    return 0
 }
 
 
@@ -93,7 +112,12 @@ do
             fi
         fi
 
-        recycle_file "$i"
+        if [ -d "$i" ] && [ "$recursive" = true ] ; then
+            recycle_dir "$i"  # recycle dir contents (-r)
+        else
+            recycle_file "$i"  # recycle file
+        fi
+
         if [ "$verbose" = true ] ; then
             echo "recycled '$i'"
         fi
