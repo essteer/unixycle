@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Unixycle - A UNIX recycle bin
+
+# initialise recyclebin and .restore.info
+recycle_script_abs_path=$(realpath $0)  # get abs path for this script
+mkdir -p "$HOME/recyclebin"  # create recyclebin if it does not exist
+if ! [ -e "$HOME/.restore.info" ] ; then
+    touch "$HOME/.restore.info"  # create .restore.info if it does not exist
+fi
+
+if [ $# -eq 0 ]
+then
+    echo "recycle: missing operand"
+    exit 1  # exit if no args provided
+fi
+
+if ! [ -e "$1" ]
+then
+    echo "cannot recycle '$1': No such file"
+    exit 2  # exit if file does not exist
+elif [ -d "$1" ]
+then
+    echo "cannot recycle '$1': Is a directory"
+    exit 3  # exit if dir provided
+fi
+
+arg_abs_path=$(realpath $1)
+if [ "$arg_abs_path" = "$recycle_script_abs_path" ]
+then
+    echo "attempting to delete recycle - operation aborted"
+    exit 4  # exit if recycle script provided
+fi
+
+
+# Above checks confirmed: arg passed, file exists, file is file, file is not recycle
+inode=$(ls -i $arg_abs_path | cut -d" " -f1)
+
+
+echo "valid arg provided"
+exit 0
