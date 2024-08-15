@@ -21,15 +21,15 @@ function validate_file() {
     # validates: file exists, file is file, file is not recycle
     if ! [ -e "$1" ] ; then
         echo "cannot recycle '$1': No such file"
-        return 2  # exit function if file does not exist
+        return 3  # exit function if file does not exist
     elif [ -d "$1" ] ; then
         echo "cannot recycle '$1': Is a directory"
-        return 3  # exit function if dir provided
+        return 4  # exit function if dir provided
     fi
     target_abs_path=$(realpath $1)
     if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
         echo "attempting to delete recycle - operation aborted"
-        return 4  # exit function if recycle script provided
+        return 5  # exit function if recycle script provided
     fi
     return 0  # is valid file
 }
@@ -51,10 +51,34 @@ function recycle_file() {
 }
 
 
+OPTIND=1
+while getopts ":iv" opt
+do
+    case $opt in
+        i|I) interactive=true ;;
+        v|V) verbose=true ;;
+        \?) echo "invalid option: $OPTARG"
+            exit 2 ;;
+    esac
+done
+shift $((OPTIND-1))
+
+
 for i in "$@"
 do
-    if validate_file "$i" ; then
+    if validate_file "$i" ; then  # validate each file before attempting to recycle
+
+        if [ "$interactive" = true ] ; then
+            read -p "recycle '$i'? y/n " recycleDecision
+            if [ "$recycleDecision" != "y" ] && [ "$recycleDecision" != "Y" ] ; then
+                continue ;  # continue iteration if user doesn't affirm deletion
+            fi
+        fi
+
         recycle_file "$i"
+        if [ "$verbose" = true ] ; then
+            echo "recycled '$i'"
+        fi
     fi
 done
 
