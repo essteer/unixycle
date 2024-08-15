@@ -1,6 +1,23 @@
 #!/bin/bash
 
+################################
 # Unixycle - A UNIX recycle bin
+################################
+# Date: 16/08/2024
+# Author: Elliott Steer
+# `recycle` creates a recyclebin directory in a user's $HOME and 
+# stores target files there with their inode numbers appended. It
+# can also recursively recycle an entire directory's file contents.
+# 
+# File usage:
+# "$ bash recycle -iv file1.txt file2.doc moreFiles*"
+# 
+# Directory usage (recursive only):
+# "$ bash recycle -irv dir1"
+#
+# Data for recycled files is stored in $HOME/.restore.info.
+# See the accompanying `restore` script for details.
+################################
 
 # initialise recyclebin and .restore.info
 recycle_script_abs_path=$(realpath $0)
@@ -52,10 +69,11 @@ function recycle_file() {
 
 
 OPTIND=1
-while getopts ":iv" opt
+while getopts ":irv" opt
 do
     case $opt in
         i|I) interactive=true ;;
+        r|R) recursive=true ;;
         v|V) verbose=true ;;
         \?) echo "invalid option: $OPTARG"
             exit 2 ;;
