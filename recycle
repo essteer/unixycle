@@ -3,10 +3,12 @@
 # Unixycle - A UNIX recycle bin
 
 # initialise recyclebin and .restore.info
-recycle_script_abs_path=$(realpath $0)  # get abs path for this script
-mkdir -p "$HOME/recyclebin"  # create recyclebin if it does not exist
-if ! [ -e "$HOME/.restore.info" ] ; then
-    touch "$HOME/.restore.info"  # create .restore.info if it does not exist
+recycle_script_abs_path=$(realpath $0)
+recyclebin_abs_path="$HOME/recyclebin"
+restore_info_abs_path="$HOME/.restore.info"
+mkdir -p "$recyclebin_abs_path"  # create recyclebin if it does not exist
+if ! [ -e "$restore_info_abs_path" ] ; then
+    touch "$restore_info_abs_path"  # create .restore.info if it does not exist
 fi
 
 if [ $# -eq 0 ]
@@ -25,8 +27,8 @@ then
     exit 3  # exit if dir provided
 fi
 
-arg_abs_path=$(realpath $1)
-if [ "$arg_abs_path" = "$recycle_script_abs_path" ]
+target_abs_path=$(realpath $1)
+if [ "$target_abs_path" = "$recycle_script_abs_path" ]
 then
     echo "attempting to delete recycle - operation aborted"
     exit 4  # exit if recycle script provided
@@ -34,8 +36,22 @@ fi
 
 
 # Above checks confirmed: arg passed, file exists, file is file, file is not recycle
-inode=$(ls -i $arg_abs_path | cut -d" " -f1)
+target_filename=$(basename "$1")
+target_inode=$(ls -i $target_abs_path | cut -d" " -f1)
+recycle_state_name="${target_filename}_${target_inode}"
+recycle_state_abs_path="${recyclebin_abs_path}/${recycle_state_name}"
+name_in_restore_info="${recycle_state_name}:${target_abs_path}"
 
+# move target file to recyclebin under recycle_state_name
+mv "$target_abs_path" "$recycle_state_abs_path"
+# store name in .restore.info
+echo "$name_in_restore_info" >> "$restore_info_abs_path"
 
-echo "valid arg provided"
+#echo "arg_abs_path: $arg_abs_path"
+#echo "filename: $filename"
+#echo "inode: $inode"
+#echo "name in recyclebin: $name_in_recyclebin"
+#echo "name in .restore.info: $name_in_restore_info" 
+#echo "valid arg provided"
+
 exit 0
