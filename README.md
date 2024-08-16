@@ -79,7 +79,7 @@ The `restore` script uses this data to recover recycled files, after which their
 
 A test suite is provided in `tests/` for the `recycle` and `restore` scripts.
 
-Run the tests as follows:
+Run the tests as follows from the project root directory:
 
 ```bash
 $ bash tests/test_recycle
