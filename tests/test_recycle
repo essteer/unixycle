@@ -1,0 +1,91 @@
+#!/bin/bash
+
+
+function assert_exit_code() {
+    # Function to test script exit code
+    expected_code=$1
+    actual_code=$2
+    msg=$3
+    if [ $expected_code -eq $actual_code ]; then
+        echo "PASS: Expected exit code $expected_code. Got $actual_code - $msg"
+    else
+        echo "FAIL: Expected exit code $expected_code. Got $actual_code - $msg"
+    fi
+}
+
+
+# Test 1: Missing operand (no arguments)
+./recycle &> /dev/null
+assert_exit_code 1 $? "Missing operand test"
+
+# Test 2: Non-existent file
+./recycle missing_file.txt &> output.txt
+if grep -q "cannot recycle 'missing_file.txt': no such file" output.txt; then
+  assert_exit_code 0 $? "Non-existent file test"
+else
+  echo "FAIL: Expected 'cannot recycle' message not found"
+fi
+rm output.txt
+
+# Test 3: Attempting to delete recycle script
+./recycle recycle &> /dev/null
+assert_exit_code 5 $? "Delete recycle script test"
+
+# Test 4: Valid file recycling with verbose flag
+touch test_file.txt
+./recycle test_file.txt &> output.txt
+rm -f test_file.txt output.txt
+assert_exit_code 0 $? "Valid file recycling test"
+
+# Test 5: Invalid optional argument
+touch test_file.txt
+./recycle -x test_file.txt &> output.txt
+assert_exit_code 2 $? "Invalid option flag test"
+rm test_file.txt output.txt
+
+# Test 6: Interactive mode (user denies deletion)
+echo "n" > mock_input.txt  # Simulate user input (no)
+./recycle -i test_file.txt < mock_input.txt &> /dev/null
+assert_exit_code 0 $? "Interactive mode - deny test"
+rm mock_input.txt
+
+# Test 7: Interactive mode (user approves deletion)
+echo "y" > mock_input.txt  # Simulate user input (no)
+./recycle -i test_file.txt < mock_input.txt &> /dev/null
+assert_exit_code 0 $? "Interactive mode - approve test"
+rm mock_input.txt
+
+# Test 8: Directory without -r flag
+mkdir tmp_dir
+./recycle tmp_dir &> output.txt
+if grep -q "cannot recycle 'tmp_dir': use -r to recycle directories" output.txt; then
+  assert_exit_code 0 $? "Directory without -r flag test"
+else
+  echo "FAIL: Expected 'cannot recycle' message not found"
+fi
+rm output.txt
+rm -rf tmp_dir
+
+# Test 9: Directory with -r flag
+mkdir -p tmp_dir/subdir1/subdir2
+touch tmp_dir/file1.txt tmp_dir/subdir1/file2.txt tmp_dir/subdir1/subdir2/file3.txt
+./recycle -rv tmp_dir &> output.txt
+if grep -q "recycled 'tmp_dir/file1.txt'" output.txt && \
+   grep -q "recycled 'tmp_dir/subdir1/file2.txt'" output.txt && \
+   grep -q "recycled 'tmp_dir/subdir1/subdir2/file3.txt'" output.txt; then
+  assert_exit_code 0 $? "Recursive mode deletion test"
+else
+  echo "FAIL: Expected 'recycled' messages not found"
+fi
+rm output.txt
+rm -rf tmp_dir
+
+# Test 10: Verbose mode
+touch test_file.txt
+./recycle -v test_file.txt &> output.txt
+grep -q "recycled 'test_file.txt'" output.txt
+rm -f test_file.txt output.txt
+assert_exit_code 0 $? "Verbose mode test"
+
+
+exit 0
