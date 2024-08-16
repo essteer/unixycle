@@ -1,0 +1,52 @@
+#!/bin/bash
+
+
+function assert_exit_code() {
+    # Function to test script exit code
+    expected_code=$1
+    actual_code=$2
+    msg=$3
+    if [ $expected_code -eq $actual_code ]; then
+        echo "PASS: Expected exit code $expected_code. Got $actual_code - $msg"
+    else
+        echo "FAIL: Expected exit code $expected_code. Got $actual_code - $msg"
+    fi
+}
+
+
+# Test 1: Missing operand (no arguments)
+./restore &> /dev/null
+assert_exit_code 1 $? "Missing operand test"
+
+# Test 2: Non-existent file
+./restore missing_file.txt &> output.txt
+exit_code=$?
+if grep -q "cannot restore 'missing_file.txt': no such file" output.txt; then
+  assert_exit_code 2 $exit_code "Non-existent file test"
+else
+  echo "FAIL: Expected 'cannot restore' message not found"
+fi
+rm output.txt
+
+# Test 3: Valid file restore
+touch test_file.txt
+target_inode=$(ls -i test_file.txt | cut -d" " -f1)
+recycle_state_name="test_file.txt_${target_inode}"
+./recycle test_file.txt &> /dev/null
+./restore $recycle_state_name &> output.txt
+rm -f test_file.txt output.txt
+assert_exit_code 0 $? "Valid file restore test"
+
+# Test 4: Nested file restore
+mkdir -p tmp_dir/subdir1/subdir2
+touch tmp_dir/subdir1/subdir2/test_file.txt
+target_inode=$(ls -i tmp_dir/subdir1/subdir2/test_file.txt | cut -d" " -f1)
+recycle_state_name="test_file.txt_${target_inode}"
+./recycle -r tmp_dir &> output.txt
+./restore $recycle_state_name &> output.txt
+assert_exit_code 0 $? "Nested file restore test"
+rm output.txt
+rm -rf tmp_dir
+
+
+exit 0
