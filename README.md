@@ -2,7 +2,7 @@
 
 A recycle bin tool for UNIX.
 
-## Description
+## Documentation
 
 UNIXycle provides two scripts — `recycle` & `restore` — for use in removing files to a recycle bin in the user's `$HOME` directory from where they can later be restored.
 
@@ -75,7 +75,16 @@ This hidden file is created in the user's `$HOME` directory and records the deta
 
 The `restore` script uses this data to recover recycled files, after which their records are removed from this file.
 
+## Tests
 
+A test suite is provided in `tests/` for the `recycle` and `restore` scripts.
+
+Run the tests as follows:
+
+```bash
+$ bash tests/test_recycle
+$ bash tests/test_restore
+```
 
 ## Credits
 
