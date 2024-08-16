@@ -31,31 +31,42 @@ rm output.txt
 ./recycle recycle &> /dev/null
 assert_exit_code 5 $? "Delete recycle script test"
 
-# Test 4: Valid file recycling with verbose flag
+# Test 4: Single valid file recycling
 touch test_file.txt
 ./recycle test_file.txt &> output.txt
 rm -f test_file.txt output.txt
-assert_exit_code 0 $? "Valid file recycling test"
+assert_exit_code 0 $? "Single file recycle test"
 
-# Test 5: Invalid optional argument
+# Test 5: Wildcard usage for multiple file recycling
+touch file1.txt file2.txt file3.txt
+./recycle -v file*.txt &> output.txt
+if grep -q "recycled 'file1.txt'" output.txt && \
+   grep -q "recycled 'file2.txt'" output.txt && \
+   grep -q "recycled 'file3.txt'" output.txt; then
+  assert_exit_code 0 $? "Wildcard multiple file recycle test"
+else
+  echo "FAIL: Expected 'recycled' messages not found"
+fi
+
+# Test 6: Invalid optional argument
 touch test_file.txt
 ./recycle -x test_file.txt &> output.txt
 assert_exit_code 2 $? "Invalid option flag test"
 rm test_file.txt output.txt
 
-# Test 6: Interactive mode (user denies deletion)
+# Test 7: Interactive mode (user denies deletion)
 echo "n" > mock_input.txt  # Simulate user input (no)
 ./recycle -i test_file.txt < mock_input.txt &> /dev/null
 assert_exit_code 0 $? "Interactive mode - deny test"
 rm mock_input.txt
 
-# Test 7: Interactive mode (user approves deletion)
+# Test 8: Interactive mode (user approves deletion)
 echo "y" > mock_input.txt  # Simulate user input (no)
 ./recycle -i test_file.txt < mock_input.txt &> /dev/null
 assert_exit_code 0 $? "Interactive mode - approve test"
 rm mock_input.txt
 
-# Test 8: Directory without -r flag
+# Test 9: Directory without -r flag
 mkdir tmp_dir
 ./recycle tmp_dir &> output.txt
 if grep -q "cannot recycle 'tmp_dir': use -r to recycle directories" output.txt; then
@@ -66,7 +77,7 @@ fi
 rm output.txt
 rm -rf tmp_dir
 
-# Test 9: Directory with -r flag
+# Test 10: Directory with -r flag
 mkdir -p tmp_dir/subdir1/subdir2
 touch tmp_dir/file1.txt tmp_dir/subdir1/file2.txt tmp_dir/subdir1/subdir2/file3.txt
 ./recycle -rv tmp_dir &> output.txt
@@ -80,7 +91,7 @@ fi
 rm output.txt
 rm -rf tmp_dir
 
-# Test 10: Verbose mode
+# Test 11: Verbose mode
 touch test_file.txt
 ./recycle -v test_file.txt &> output.txt
 grep -q "recycled 'test_file.txt'" output.txt
