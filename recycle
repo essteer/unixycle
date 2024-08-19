@@ -3,7 +3,7 @@
 ################################
 # UNIXycle - A UNIX recycle bin
 ################################
-# Date: 16/08/2024
+# Date: 19/08/2024
 # Author: Elliott Steer
 # Docs: https://github.com/essteer/unixycle/blob/main/README.md
 #
@@ -48,6 +48,9 @@ function validate_file() {
     if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
         echo "attempting to delete recycle - operation aborted"
         exit 5  # exit script if recycle script provided
+    elif [ "$target_abs_path" = "$(dirname $(realpath $0))/restore" ] ; then
+        echo "attempting to delete restore - operation aborted"
+        exit 6  # exit script if restore script provided
     fi
     return 0  # is valid file
 }
