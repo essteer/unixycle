@@ -90,16 +90,33 @@ function recycle_dir() {
     return 0
 }
 
+function show_help() {
+    # displays options
+    echo "Usage: bash $(basename "$0") [OPTIONS] [FILE|DIR]"
+    echo
+    echo "Options:"
+    echo "  -a    Display ASCII art"
+    echo "  -h    Display help"
+    echo "  -i    Run in interactive mode to require confirmation before each operation"
+    echo "  -r    Run in recursive mode to recycle directory contents"
+    echo "  -v    Run in verbose mode to view process messages"
+}
+
 
 OPTIND=1
-while getopts ":airv" opt
+while getopts ":ahirv" opt
 do
     case $opt in
         a|A) asciiart=true ;;
+        h|H)
+            show_help
+            exit 0
+            ;;
         i|I) interactive=true ;;
         r|R) recursive=true ;;
         v|V) verbose=true ;;
         \?) echo "invalid option: $OPTARG"
+            show_help
             exit 2 ;;
     esac
 done
