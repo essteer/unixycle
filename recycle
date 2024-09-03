@@ -66,8 +66,13 @@ function recycle_file() {
 
     # move target file to recyclebin under recycle_state_name
     mv "$target_abs_path" "$recycle_state_abs_path"
-    # store name in .restore.info
-    echo "$name_in_restore_info" >> "$restore_info_abs_path"
+    if [ $? -eq 0 ] ; then
+        # store name in .restore.info
+        echo "$name_in_restore_info" >> "$restore_info_abs_path"
+    else
+        echo "error - failed to recycle file with exit status $?"
+        exit 7
+    fi
 }
 
 
@@ -87,7 +92,12 @@ function recycle_dir() {
         fi
     done
     rm -rf "$1"  # delete dir once all contents recycled
-    return 0
+    if [ $? -eq 0 ] ; then
+        return 0
+    else
+        echo "error - failed to delete parent dir with exit status $?"
+        exit 8
+    fi
 }
 
 function show_ascii() {
