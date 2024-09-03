@@ -25,6 +25,24 @@ if [ "$#" -eq 0 ] ; then
     exit 1  # exit if no args provided
 fi
 
+function show_help() {
+    echo "Usage: bash restore [FILE]"
+    echo
+    echo "Options:"
+    echo "  -h    Display help"
+}
+
+OPTIND=1
+while getopts ":h" opt
+do
+    case $opt in
+        h|H)
+            show_help
+            exit 0
+            ;;
+    esac
+done
+
 recycle_state_name="$(basename "$1")"
 target_abs_path_in_recyclebin="${recyclebin_abs_path}/${recycle_state_name}"
 
