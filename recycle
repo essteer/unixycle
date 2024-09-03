@@ -90,41 +90,9 @@ function recycle_dir() {
     return 0
 }
 
-function show_help() {
-    # displays options
-    echo "Usage: bash $(basename "$0") [OPTIONS] [FILE|DIR]"
-    echo
-    echo "Options:"
-    echo "  -a    Display ASCII art"
-    echo "  -h    Display help"
-    echo "  -i    Run in interactive mode to require confirmation before each operation"
-    echo "  -r    Run in recursive mode to recycle directory contents"
-    echo "  -v    Run in verbose mode to view process messages"
-}
-
-
-OPTIND=1
-while getopts ":ahirv" opt
-do
-    case $opt in
-        a|A) asciiart=true ;;
-        h|H)
-            show_help
-            exit 0
-            ;;
-        i|I) interactive=true ;;
-        r|R) recursive=true ;;
-        v|V) verbose=true ;;
-        \?) echo "invalid option: $OPTARG"
-            show_help
-            exit 2 ;;
-    esac
-done
-shift $((OPTIND-1))
-
-
-if [ "$asciiart" = true ] ; then
-    cat << "EOF"
+function show_ascii() {
+    # displays ASCII art
+        cat << "EOF"
 
                  .,aadd88888888bbaa,.
              ,ad8888888888888888888888ba,
@@ -152,7 +120,42 @@ if [ "$asciiart" = true ] ; then
                  ``""YY88888888PP""``
 
 EOF
-fi
+}
+
+function show_help() {
+    # displays options
+    echo "Usage: bash $(basename "$0") [OPTIONS] [FILE|DIR]"
+    echo
+    echo "Options:"
+    echo "  -a    Display ASCII art"
+    echo "  -h    Display help"
+    echo "  -i    Run in interactive mode to require confirmation before each operation"
+    echo "  -r    Run in recursive mode to recycle directory contents"
+    echo "  -v    Run in verbose mode to view process messages"
+}
+
+
+OPTIND=1
+while getopts ":ahirv" opt
+do
+    case $opt in
+        a|A)
+            show_ascii
+            ;;
+        h|H)
+            show_help
+            exit 0
+            ;;
+        i|I) interactive=true ;;
+        r|R) recursive=true ;;
+        v|V) verbose=true ;;
+        \?) echo "invalid option: $OPTARG"
+            show_help
+            exit 2 ;;
+    esac
+done
+shift $((OPTIND-1))
+
 
 for i in "$@"
 do
