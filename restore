@@ -3,7 +3,6 @@
 ################################
 # UNIXycle - A UNIX recycle bin
 ################################
-# Date: 16/08/2024
 # Author: Elliott Steer
 # Docs: https://github.com/essteer/unixycle/blob/main/README.md
 #
@@ -21,12 +20,12 @@
 recyclebin_abs_path="$HOME/recyclebin"
 restore_info_abs_path="$HOME/.restore.info"
 
-if [ $# -eq 0 ] ; then
+if [ "$#" -eq 0 ] ; then
     echo "restore: missing operand"
     exit 1  # exit if no args provided
 fi
 
-recycle_state_name=$(basename "$1")
+recycle_state_name="$(basename "$1")"
 target_abs_path_in_recyclebin="${recyclebin_abs_path}/${recycle_state_name}"
 
 if ! [ -e "$target_abs_path_in_recyclebin" ] ; then
@@ -37,7 +36,7 @@ fi
 data_in_restore_info=$(cat "$restore_info_abs_path" | grep "$recycle_state_name")
 target_original_abs_path=$(echo -n "$data_in_restore_info" | cut -d: -f2)
 
-if [ -e $target_original_abs_path ] ; then
+if [ -e "$target_original_abs_path" ] ; then
     echo "$target_original_abs_path already exists"
     read -p "Do you want to overwrite? y/n " overwriteDecision
 
