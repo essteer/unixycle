@@ -18,7 +18,8 @@ The `recycle` script accepts optional arguments as follows:
 
 | Option | Mode        | Description                                                                     |
 | :----: | ----------- | ------------------------------------------------------------------------------- |
-|  `-a`  | ASCII       | Displays... ASCII art.                                                          |
+|  `-a`  | ASCII       | Displays ASCII art loading screen.                                              |
+|  `-h`  | help       | Displays help and command line options.                                          |
 |  `-i`  | interactive | Issues a prompt before recycling each file.                                     |
 |  `-r`  | recursive   | Accepts directories to recycle their file contents, then deletes the directory. |
 |  `-v`  | verbose     | Outputs a confirmation message for each recycled file.                          |
