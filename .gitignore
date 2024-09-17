@@ -1,2 +1,6 @@
 recycle_hard_link
 *.swp
+
+# logs
+logs/
+*.log
