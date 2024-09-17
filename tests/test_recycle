@@ -20,10 +20,10 @@ assert_exit_code 1 $? "Missing operand test"
 
 # Test 2: Non-existent file
 ./recycle missing_file.txt &> output.txt
-if grep -q "cannot recycle 'missing_file.txt': no such file" output.txt; then
+if grep -q "Cannot recycle 'missing_file.txt': no such file" output.txt; then
   assert_exit_code 0 $? "Non-existent file test"
 else
-  echo "FAIL: Expected 'cannot recycle' message not found"
+  echo "FAIL: Expected 'Cannot recycle' message not found"
 fi
 rm output.txt
 
@@ -73,7 +73,7 @@ rm mock_input.txt
 # Test 10: Directory without -r flag
 mkdir tmp_dir
 ./recycle tmp_dir &> output.txt
-if grep -q "cannot recycle 'tmp_dir': use -r to recycle directories" output.txt; then
+if grep -q "Cannot recycle 'tmp_dir': use -r to recycle directories" output.txt; then
   assert_exit_code 0 $? "Directory without -r flag test"
 else
   echo "FAIL: Expected 'cannot recycle' message not found"

@@ -20,16 +20,30 @@
 # See the accompanying `restore` script for details.
 ################################
 
+log_filepath="logs/recycle.log"
 recycle_script_abs_path="$(realpath $0)"
 recyclebin_abs_path="$HOME/recyclebin"
 restore_info_abs_path="$HOME/.restore.info"
+
+function timestamp() {
+    date +"%Y-%m-%d %H:%M:%S"
+}
+
+if [[ ! -f "${log_filepath}" ]]; then
+    mkdir -p logs
+    touch "${log_filepath}"
+    echo "$(timestamp) - INFO - recycle - Log file created at ${log_filepath}" | tee -a "${log_filepath}"
+fi
+
 mkdir -p "$recyclebin_abs_path"  # create recyclebin if it does not exist
 if ! [ -e "$restore_info_abs_path" ] ; then
     touch "$restore_info_abs_path"  # create .restore.info if it does not exist
+    echo "$(timestamp) - INFO - recycle - .restore.info created at ${restore_info_abs_path}" | tee -a "${log_filepath}"
 fi
 
 if [ $# -eq 0 ] ; then
-    echo "recycle: missing operand"
+    echo "$(timestamp) - WARNING - recycle - Missing operand: no files or directories provided" | tee -a "${log_filepath}"
+    echo "Usage: bash $(basename "$0") [OPTIONS] [FILE|DIR]"
     exit 1  # exit if no args provided
 fi
 
@@ -37,20 +51,25 @@ fi
 function validate_file() {
     # validates: file exists, file is file, file is not recycle
     if ! [ -e "$1" ] ; then
-        echo "cannot recycle '$1': no such file"
+        echo "$(timestamp) - WARNING - recycle - Cannot recycle '$1': no such file" | tee -a "${log_filepath}"
         return 3  # exit function if file does not exist
+
     elif [ -d "$1" ] && [ "$recursive" != true ] ; then
-        echo "cannot recycle '$1': use -r to recycle directories"
+        echo "$(timestamp) - WARNING - recycle - Cannot recycle '$1': use -r to recycle directories" | tee -a "${log_filepath}"
         return 4  # exit function if dir provided
     fi
+
     target_abs_path="$(realpath $1)"
     if [ "$target_abs_path" = "$recycle_script_abs_path" ] ; then
-        echo "attempting to delete recycle - operation aborted"
+        echo "$(timestamp) - WARNING - recycle - Cannot recycle recycle script: operation aborted" | tee -a "${log_filepath}"
         exit 5  # exit script if recycle script provided
+
     elif [ "$target_abs_path" = "$(dirname $(realpath $0))/restore" ] ; then
-        echo "attempting to delete restore - operation aborted"
+        echo "$(timestamp) - WARNING - recycle - Cannot recycle restore script: operation aborted" | tee -a "${log_filepath}"
         exit 6  # exit script if restore script provided
     fi
+
+    echo "$(timestamp) - INFO - recycle - '$1' passed validation" | tee -a "${log_filepath}"
     return 0  # is valid file
 }
 
