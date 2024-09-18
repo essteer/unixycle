@@ -1,6 +1,6 @@
-# UNIXycle :recycle:
+<h1 align="center">UNIXycle :recycle:</h1>
 
-A recycle bin tool for UNIX.
+<p align="center">A recycle bin tool for UNIX.</p>
 
 ## Documentation
 
@@ -86,6 +86,10 @@ Run the tests as follows from the project root directory:
 $ bash tests/test_recycle
 $ bash tests/test_restore
 ```
+
+## Logs
+
+Runtime logs for the `recycle` and `restore` scripts are stored in the `logs` directory as `recycle.log` and `restore.log`, respectively.
 
 ## Credits
 
