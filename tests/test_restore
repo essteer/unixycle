@@ -21,10 +21,10 @@ assert_exit_code 1 $? "Missing operand test"
 # Test 2: Non-existent file
 ./restore missing_file.txt &> output.txt
 exit_code=$?
-if grep -q "cannot restore 'missing_file.txt': no such file" output.txt; then
+if grep -q "Cannot restore 'missing_file.txt': no such file" output.txt; then
   assert_exit_code 2 $exit_code "Non-existent file test"
 else
-  echo "FAIL: Expected 'cannot restore' message not found"
+  echo "FAIL: Expected 'Cannot restore' message not found"
 fi
 rm output.txt
 
