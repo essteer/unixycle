@@ -32,13 +32,13 @@ function timestamp() {
 if [[ ! -f "${log_filepath}" ]]; then
     mkdir -p logs
     touch "${log_filepath}"
-    echo "$(timestamp) - INFO - recycle - Log file created at ${log_filepath}" | tee -a "${log_filepath}"
+    echo "$(timestamp) - INFO - recycle - Log file created at ${log_filepath}" >> "${log_filepath}"
 fi
 
 mkdir -p "$recyclebin_abs_path"  # create recyclebin if it does not exist
 if ! [ -e "$restore_info_abs_path" ] ; then
     touch "$restore_info_abs_path"  # create .restore.info if it does not exist
-    echo "$(timestamp) - INFO - recycle - .restore.info created at ${restore_info_abs_path}" | tee -a "${log_filepath}"
+    echo "$(timestamp) - INFO - recycle - .restore.info created at ${restore_info_abs_path}" >> "${log_filepath}"
 fi
 
 if [ $# -eq 0 ] ; then
@@ -69,7 +69,7 @@ function validate_file() {
         exit 6  # exit script if restore script provided
     fi
 
-    echo "$(timestamp) - INFO - recycle - '$1' passed validation" | tee -a "${log_filepath}"
+    echo "$(timestamp) - INFO - recycle - '$1' passed validation" >> "${log_filepath}"
     return 0  # is valid file
 }
 
@@ -88,8 +88,9 @@ function recycle_file() {
     if [ $? -eq 0 ] ; then
         # store name in .restore.info
         echo "$name_in_restore_info" >> "$restore_info_abs_path"
+        echo "$(timestamp) - INFO - recycle - Moved ${target_filename} to recyclebin as ${recycle_state_name}" >> "${log_filepath}"
     else
-        echo "error - failed to recycle file with exit status $?"
+        echo "$(timestamp) - ERROR - recycle - Failed to recycle ${target_filename} with exit status $?" | tee -a "${log_filepath}"
         exit 7
     fi
 }
@@ -112,9 +113,10 @@ function recycle_dir() {
     done
     rm -rf "$1"  # delete dir once all contents recycled
     if [ $? -eq 0 ] ; then
+        echo "$(timestamp) - INFO - recycle - Removed parent directory $1" >> "${log_filepath}"
         return 0
     else
-        echo "error - failed to delete parent dir with exit status $?"
+        echo "$(timestamp) - ERROR - recycle - Failed to recycle parent directory $1 with exit status $?" | tee -a "${log_filepath}"
         exit 8
     fi
 }
